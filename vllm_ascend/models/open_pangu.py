@@ -27,7 +27,8 @@ import vllm.envs as envs
 from torch import nn
 from transformers import PretrainedConfig
 from vllm.compilation.decorators import support_torch_compile
-from vllm.attention import Attention, AttentionMetadata, AttentionType
+from vllm.model_executor.layers.attention import Attention
+from vllm.v1.attention.backend import AttentionMetadata, AttentionType
 from vllm.config import CacheConfig, ModelConfig, VllmConfig
 from vllm.distributed import (get_tensor_model_parallel_rank,
                               get_tensor_model_parallel_world_size,
