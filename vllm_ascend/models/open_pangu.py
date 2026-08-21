@@ -49,7 +49,6 @@ from vllm.model_executor.layers.linear import (ColumnParallelLinear,
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
 from vllm.model_executor.layers.rotary_embedding import get_rope
-from vllm.model_executor.layers.sampler import get_sampler
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
 from vllm.model_executor.model_loader.weight_utils import (
@@ -60,7 +59,6 @@ from vllm_ascend.ascend_config import get_ascend_config
 from vllm_ascend.quantization.method_adapters import AscendLinearMethod
 from vllm_ascend.quantization.methods.w8a8_dynamic import AscendW8A8DynamicLinearMethod
 from vllm_ascend.utils import dispose_tensor
-from vllm.model_executor.sampling_metadata import SamplingMetadata
 
 
 def _rotate_gptj(x: torch.Tensor) -> torch.Tensor:
@@ -1005,7 +1003,6 @@ class OpenPanguForCausalLM(nn.Module):
                                       quant_config=quant_config,
                                       prefix=maybe_prefix(prefix, "lm_head"))
         self.logits_processor = LogitsProcessor(config.vocab_size)
-        self.sampler = get_sampler()
     
     def load_attn_mlp_weight(self,
                              attn_mlp_replace_mapping: List[Tuple[str, str, int]],
@@ -1119,11 +1116,9 @@ class OpenPanguForCausalLM(nn.Module):
     def compute_logits(
         self,
         hidden_states: torch.Tensor,
-        sampling_metadata: SamplingMetadata,
     ) -> Optional[torch.Tensor]:
-        logits = self.logits_processor(self.lm_head, hidden_states, sampling_metadata)
+        logits = self.logits_processor(self.lm_head, hidden_states)
         return logits
-
 
 class PanguUltraMoEForCausalLM(OpenPanguForCausalLM):
     pass
