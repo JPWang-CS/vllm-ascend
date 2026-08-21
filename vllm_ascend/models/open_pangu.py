@@ -48,7 +48,7 @@ from vllm.model_executor.layers.linear import (ColumnParallelLinear,
                                                QKVParallelLinear)
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
 from vllm.model_executor.layers.quantization import QuantizationConfig
-from vllm.model_executor.layers.rotary_embedding import get_rope, _rotate_gptj
+from vllm.model_executor.layers.rotary_embedding import get_rope
 from vllm.model_executor.layers.sampler import get_sampler
 from vllm.model_executor.layers.vocab_parallel_embedding import (
     ParallelLMHead, VocabParallelEmbedding)
@@ -61,6 +61,13 @@ from vllm_ascend.quantization.method_adapters import AscendLinearMethod
 from vllm_ascend.quantization.methods.w8a8_dynamic import AscendW8A8DynamicLinearMethod
 from vllm_ascend.utils import dispose_tensor
 from vllm.model_executor.sampling_metadata import SamplingMetadata
+
+
+def _rotate_gptj(x: torch.Tensor) -> torch.Tensor:
+    """Apply GPT-J-style pairwise rotary rotation without vLLM private APIs."""
+    x_even = x[..., ::2]
+    x_odd = x[..., 1::2]
+    return torch.stack((-x_odd, x_even), dim=-1).flatten(start_dim=-2)
 
 
 class OpenPanguMergedReplicatedLinear(ReplicatedLinear):
