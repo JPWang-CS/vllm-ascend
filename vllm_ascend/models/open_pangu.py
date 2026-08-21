@@ -276,11 +276,11 @@ class PanguEmbeddedModel(nn.Module):
 
         self.start_layer, self.end_layer, self.layers = make_layers(
             config.num_hidden_layers,
-            lambda layer_prefix: PanguEmbeddedDecoderLayer(
+            lambda prefix: PanguEmbeddedDecoderLayer(
                 config=config,
                 cache_config=cache_config,
                 quant_config=quant_config,
-                prefix=layer_prefix,
+                prefix=prefix,
             ),
             prefix=f"{prefix}.layers",
         )
